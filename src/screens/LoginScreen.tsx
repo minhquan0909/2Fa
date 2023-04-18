@@ -1,7 +1,6 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useState} from 'react';
 import {
   FlatList,
-  Image,
   KeyboardAvoidingView,
   Modal,
   SafeAreaView,
@@ -13,13 +12,17 @@ import {
   View,
 } from 'react-native';
 import {Countries} from '../Data/Countries';
-import LoginIMG from '../assets/Login.png';
 import ForgotPWIMG from '../assets/ForgotPW.png';
+import LoginIMG from '../assets/Login.png';
+import CustomButton from '../components/CustomButton';
+import CustomHeader from '../components/CustomHeader';
 
 const LoginScreen = ({navigation}) => {
-  let textInput = useRef(null);
   const defaultCountryCode = '+84';
   const defaultMaskCountry = '39 666 1101';
+  const loginTitle = 'Welcome Back';
+  const desc = 'Please input you phone number';
+  const forgotPWTitle = 'Forgot Password';
   const [phoneNumber, setPhoneNumber] = useState();
   const [focusInput, setFocusInput] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
@@ -64,9 +67,7 @@ const LoginScreen = ({navigation}) => {
   const changeLoginOrForgotPW = () => {
     setLoginOrForgotPW(!loginOrForgetPw);
   };
-  useEffect(() => {
-    textInput.focus();
-  }, []);
+
   const filterCountries = value => {
     if (value) {
       const countryData = countriesData.filter(
@@ -124,14 +125,11 @@ const LoginScreen = ({navigation}) => {
         keyboardVerticalOffset={50}
         behavior="padding"
         style={styles.keyboardAvoidingViewContainer}>
-        <Image
-          source={loginOrForgetPw === true ? LoginIMG : ForgotPWIMG}
-          style={styles.imgLogin}
+        <CustomHeader
+          title={loginOrForgetPw ? loginTitle : forgotPWTitle}
+          description={desc}
+          imgSource={loginOrForgetPw ? LoginIMG : ForgotPWIMG}
         />
-        <Text style={styles.introTitle}>
-          {loginOrForgetPw === true ? 'Welcome Back !' : 'Forgot Password'}
-        </Text>
-        <Text style={styles.textTitle}>{'Please input your phone number'}</Text>
         <View
           style={[
             styles.inputContainer,
@@ -144,7 +142,6 @@ const LoginScreen = ({navigation}) => {
           </TouchableOpacity>
           {renderModal()}
           <TextInput
-            ref={input => (textInput = input)}
             placeholder={placeholder}
             keyboardType="numeric"
             value={phoneNumber}
@@ -166,15 +163,11 @@ const LoginScreen = ({navigation}) => {
           </TouchableOpacity>
         </View>
         <View style={styles.bottomView}>
-          <TouchableOpacity onPress={onPressLogin}>
-            <View
-              style={[
-                styles.btnLogin,
-                {backgroundColor: phoneNumber ? '#1A4F8B' : 'gray'},
-              ]}>
-              <Text style={styles.textLogin}>{'Send OTP'}</Text>
-            </View>
-          </TouchableOpacity>
+          <CustomButton
+            activeBy={phoneNumber}
+            title={'Send OTP'}
+            onPress={onPressLogin}
+          />
         </View>
       </KeyboardAvoidingView>
     </View>
@@ -190,10 +183,7 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: 'center',
   },
-  textTitle: {
-    fontSize: 15,
-    marginBottom: 50,
-  },
+
   inputContainer: {
     flexDirection: 'row',
     paddingHorizontal: 12,
@@ -215,26 +205,10 @@ const styles = StyleSheet.create({
   bottomView: {
     flex: 1,
     justifyContent: 'flex-end',
-    marginBottom: 50,
+    marginBottom: 30,
     alignItems: 'center',
   },
-  btnLogin: {
-    width: 300,
-    height: 50,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  textLogin: {
-    color: 'white',
-    alignItems: 'center',
-  },
-  imgLogin: {width: 212, height: 212},
-  introTitle: {
-    fontWeight: 'bold',
-    fontSize: 30,
-    marginVertical: 30,
-  },
+
   forgotPWContainer: {
     flexDirection: 'row',
     alignSelf: 'flex-end',
