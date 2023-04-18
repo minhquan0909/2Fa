@@ -1,21 +1,21 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  KeyboardAvoidingView,
-  TextInput,
-  TouchableOpacity,
+  FlatList,
   Image,
-  Pressable,
+  KeyboardAvoidingView,
   Modal,
   SafeAreaView,
-  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
   TouchableWithoutFeedback,
+  View,
 } from 'react-native';
-import LoginLogo from '../assets/Login.png';
 import {Countries} from '../Data/Countries';
-import axios from 'axios';
+import LoginIMG from '../assets/Login.png';
+import ForgotPWIMG from '../assets/ForgotPW.png';
+
 const LoginScreen = ({navigation}) => {
   let textInput = useRef(null);
   const defaultCountryCode = '+84';
@@ -26,6 +26,7 @@ const LoginScreen = ({navigation}) => {
   const [countriesData, setCountriesData] = useState(Countries);
   const [codeCountry, setCodeCountry] = useState(defaultCountryCode);
   const [placeholder, setPlaceHolder] = useState(defaultMaskCountry);
+  const [loginOrForgetPw, setLoginOrForgotPW] = useState(true); //Login:true ForgotPw:false
   const onShowModal = () => {
     setModalVisible(!modalVisible);
   };
@@ -59,6 +60,9 @@ const LoginScreen = ({navigation}) => {
     setCodeCountry(item?.dialCode);
     setPlaceHolder(item?.mask);
     onShowModal();
+  };
+  const changeLoginOrForgotPW = () => {
+    setLoginOrForgotPW(!loginOrForgetPw);
   };
   useEffect(() => {
     textInput.focus();
@@ -120,8 +124,13 @@ const LoginScreen = ({navigation}) => {
         keyboardVerticalOffset={50}
         behavior="padding"
         style={styles.keyboardAvoidingViewContainer}>
-        <Image source={LoginLogo} style={styles.imgLogin} />
-        <Text style={styles.introTitle}>Welcome Back !</Text>
+        <Image
+          source={loginOrForgetPw === true ? LoginIMG : ForgotPWIMG}
+          style={styles.imgLogin}
+        />
+        <Text style={styles.introTitle}>
+          {loginOrForgetPw === true ? 'Welcome Back !' : 'Forgot Password'}
+        </Text>
         <Text style={styles.textTitle}>{'Please input your phone number'}</Text>
         <View
           style={[
@@ -148,8 +157,12 @@ const LoginScreen = ({navigation}) => {
           />
         </View>
         <View style={styles.forgotPWContainer}>
-          <TouchableOpacity hitSlop={20}>
-            <Text style={styles.textForgotPw}>Forgot Password ?</Text>
+          <TouchableOpacity hitSlop={20} onPress={changeLoginOrForgotPW}>
+            <Text style={styles.textForgotPw}>
+              {loginOrForgetPw === true
+                ? 'Forgot Password ?'
+                : 'Already have account'}
+            </Text>
           </TouchableOpacity>
         </View>
         <View style={styles.bottomView}>
@@ -159,7 +172,7 @@ const LoginScreen = ({navigation}) => {
                 styles.btnLogin,
                 {backgroundColor: phoneNumber ? '#1A4F8B' : 'gray'},
               ]}>
-              <Text style={styles.textLogin}>Login</Text>
+              <Text style={styles.textLogin}>{'Send OTP'}</Text>
             </View>
           </TouchableOpacity>
         </View>

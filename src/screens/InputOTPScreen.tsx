@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 const InputOTPScreen = ({navigation}) => {
   let textInput = useRef(null);
-  let clockCall = null;
+  let clockCall: any = null;
   const lengthInput = 6;
   const defaultCountDown = 30;
   const [internalValue, setInternalValue] = useState('');
@@ -38,7 +38,7 @@ const InputOTPScreen = ({navigation}) => {
   const onChangedText = value => {
     setInternalValue(value);
     if (value.length === lengthInput) {
-      navigation.navigate('Home');
+      navigation.navigate('CreateAccount');
     }
   };
   const onChangeNumber = () => {
