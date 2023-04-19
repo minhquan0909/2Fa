@@ -1,14 +1,15 @@
 import React, {useState} from 'react';
 import {
+  Alert,
   FlatList,
   Image,
-  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import HomeIMG from '../assets/HomeIMG.png';
+import AddNewIC from '../assets/add_ic.png';
 import CoppyIC from '../assets/copy_ic.png';
 import FB_IC from '../assets/fb_ic.png';
 import Insta_IC from '../assets/insta_ic.png';
@@ -16,39 +17,39 @@ import Reddit_IC from '../assets/red_ic.png';
 import SettingIC from '../assets/setting_ic.png';
 import Tele_IC from '../assets/telegram_ic.png';
 import CustomHeader from '../components/CustomHeader';
-import MenuBar_IC from '../assets/menubar_ic.png';
-import {SafeAreaView} from 'react-native-safe-area-context';
 const HomeScreen = ({navigation}) => {
   const [selelectedCode, setSelectedCode] = useState();
   const [randomNumber, setRandomNumber] = useState(981232);
   const [counter, setCounter] = useState(30);
-  const [modalSettingsVisible, setModalSettingsVisible] = useState(false);
   const [modalFeaturesVisible, setModalFeaturesVisible] = useState(false);
-  // useEffect(() => {
-  //   countDown();
-  // }, []);
-  // const resetCode = () => {
-  //   setRandomNumber(Math.floor(Math.random() * 1000000));
-  // };
-  // const countDown = () => {
-  //   setCounter(counter - 1);
-  // };
+
   const DUMP_ATHENCODES = [
     {id: 1, codeName: 'Facebook', icon: FB_IC},
     {id: 2, codeName: 'Instagram', icon: Insta_IC},
     {id: 3, codeName: 'Telegram', icon: Tele_IC},
     {id: 4, codeName: 'Reddit', icon: Reddit_IC},
   ];
-
+  const addNewItem = {id: 0, codeName: 'Add new', icon: AddNewIC};
+  const DUMPCOMPLETE_DATA = [addNewItem, ...DUMP_ATHENCODES];
   const onPressCopyCode = () => {
     console.log(randomNumber);
   };
   const renderItem = ({item}) => {
     const onPressAuthenItem = () => {
-      console.log(item);
+      if (item.id === 0) {
+        Alert.alert('Add new item');
+      }
+    };
+    const onLongPressAuthenItem = () => {
+      if (item.id !== 0) {
+        Alert.alert('Delete code?');
+      }
     };
     return (
-      <TouchableOpacity key={item.id} onPress={onPressAuthenItem}>
+      <TouchableOpacity
+        key={item.id}
+        onPress={onPressAuthenItem}
+        onLongPress={onLongPressAuthenItem}>
         <View style={styles.listItem}>
           <Image source={item.icon} style={styles.itemIconIMG} />
           <Text>{item.codeName}</Text>
@@ -59,16 +60,16 @@ const HomeScreen = ({navigation}) => {
   const onPressSetting = () => {
     navigation.navigate('Setting');
   };
-  const onPressFeature = () => {};
+
   return (
     <View style={styles.container}>
       <View style={styles.topBarContainer}>
-        <TouchableOpacity style={styles.topButton} onPress={onPressFeature}>
-          <Image source={MenuBar_IC} style={styles.settingIC} />
-        </TouchableOpacity>
         <TouchableOpacity style={styles.topButton} onPress={onPressSetting}>
           <Image source={SettingIC} style={styles.settingIC} />
         </TouchableOpacity>
+        <View style={styles.counterContainer}>
+          <Text style={styles.counterText}>{counter}</Text>
+        </View>
       </View>
       <View style={styles.content}>
         <CustomHeader
@@ -91,7 +92,7 @@ const HomeScreen = ({navigation}) => {
       <View style={styles.codeListArea}>
         <FlatList
           style={styles.flatListContainer}
-          data={DUMP_ATHENCODES}
+          data={DUMPCOMPLETE_DATA}
           renderItem={renderItem}
         />
       </View>
@@ -102,11 +103,11 @@ export default React.memo(HomeScreen);
 const styles = StyleSheet.create({
   container: {flex: 1, alignItems: 'center'},
   topBarContainer: {
-    // alignSelf: 'flex-end',
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 15,
+    alignItems: 'center',
   },
   topButton: {
     backgroundColor: 'white',
@@ -132,9 +133,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
   },
-  counter: {
-    justifyContent: 'flex-end',
-  },
+
   codeStyle: {
     fontSize: 20,
     letterSpacing: 15,
@@ -187,8 +186,13 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 10,
   },
-  settingModal: {
-    flex: 1,
+  counterContainer: {
     backgroundColor: 'white',
+    padding: 5,
+    borderRadius: 15,
+  },
+  counterText: {
+    color: '#FF7417',
+    fontSize: 25,
   },
 });
