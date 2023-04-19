@@ -1,20 +1,16 @@
-import React, {useRef, useState} from 'react';
+import React, {useState} from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TextInput,
-  TouchableOpacity,
   Alert,
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
   Keyboard,
+  KeyboardAvoidingView,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 import CreateAccountIMG from '../assets/CreateAccount.png';
+import CustomButton from '../components/CustomButton';
 import CustomHeader from '../components/CustomHeader';
 import CustomTextInput from '../components/CustomTextInput';
-import CustomButton from '../components/CustomButton';
 const CreateAccountScreen = ({navigation}) => {
   const [focusPassword, setFocusPassword] = useState(true);
   const [focusConfirmPassword, setFocusConfirmPassword] = useState(false);

@@ -1,20 +1,18 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useState} from 'react';
 import {
-  Alert,
-  Button,
   KeyboardAvoidingView,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import CustomHeader from '../components/CustomHeader';
-import ProfileIMG from '../assets/UpdateProfile.png';
-import CustomTextInput from '../components/CustomTextInput';
-import CustomButton from '../components/CustomButton';
 import DatePicker from 'react-native-date-picker';
 import SelectDropdown from 'react-native-select-dropdown';
-const ProfileScreen = () => {
+import ProfileIMG from '../assets/UpdateProfile.png';
+import CustomButton from '../components/CustomButton';
+import CustomHeader from '../components/CustomHeader';
+import CustomTextInput from '../components/CustomTextInput';
+const ProfileScreen = ({navigation}) => {
   const [gender, setGender] = useState(null);
   const [birthday, setBirthDay] = useState(new Date());
   const [open, setOpen] = useState(false);
@@ -28,17 +26,14 @@ const ProfileScreen = () => {
   const onChangeName = value => {
     setFullName(value);
   };
-  const onChangeBirthday = value => {
-    setBirthDay(value);
-  };
-  const onChangeGender = value => {
-    setGender(value);
-  };
+ 
   const onChangeEmail = value => {
     setEmail(value);
   };
   const onPressUpdateProfile = () => {
-    Alert.alert('OK');
+    if (fullName && gender && birthday && email) {
+      navigation.navigate('Home');
+    }
   };
 
   return (

@@ -15,12 +15,12 @@ const styles = StyleSheet.create({
   introTitle: {
     fontWeight: 'bold',
     fontSize: 30,
-    marginVertical: 30,
+    marginVertical: 20,
   },
-  imgLogin: {width: 212, height: 212},
+  imgLogin: {width: 250, height: 250},
   textTitle: {
     fontSize: 15,
-    marginBottom: 50,
+    marginVertical: 15,
   },
   containerStyle: {
     width: '100%',
