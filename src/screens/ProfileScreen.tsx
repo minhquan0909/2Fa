@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Alert,
   Button,
@@ -13,10 +13,9 @@ import ProfileIMG from '../assets/UpdateProfile.png';
 import CustomTextInput from '../components/CustomTextInput';
 import CustomButton from '../components/CustomButton';
 import DatePicker from 'react-native-date-picker';
-import {Picker} from '@react-native-picker/picker';
-
+import SelectDropdown from 'react-native-select-dropdown';
 const ProfileScreen = () => {
-  const [gender, setGender] = useState('male');
+  const [gender, setGender] = useState(null);
   const [birthday, setBirthDay] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [fullName, setFullName] = useState();
@@ -25,6 +24,7 @@ const ProfileScreen = () => {
   const [focusBirthDay, setFocusBirthDay] = useState(false);
   const [focusEmail, setFocusEmail] = useState(false);
   const [focusGender, setForcusGender] = useState(false);
+  const genderDropdata = ['male', 'female', 'others'];
   const onChangeName = value => {
     setFullName(value);
   };
@@ -40,6 +40,7 @@ const ProfileScreen = () => {
   const onPressUpdateProfile = () => {
     Alert.alert('OK');
   };
+
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView
@@ -75,44 +76,71 @@ const ProfileScreen = () => {
                 onChangeText={onChangeEmail}
                 keyboardType={'default'}
               />
+              {/* <CustomTextInput
+                placeholder={'BirthDay'}
+                focusInput={focusBirthDay}
+                value={birthday.toDateString()}
+                onChangeFocus={() => setFocusBirthDay(true)}
+                onChageBlur={() => setFocusBirthDay(false)}
+                autoFocus={focusBirthDay}
+                onChangeText={onChangeBirthday}
+                keyboardType={'default'}
+              /> */}
               <View style={styles.checkboxandDatePicker}>
-                <Picker
-                  selectedValue={gender}
-                  onValueChange={(itemValue, itemIndex) =>
-                    setGender(itemValue)
-                  }>
-                  <Picker.Item label="Male" value="male" />
-                  <Picker.Item label="Female" value="female" />
-                  <Picker.Item label="Others" value="others" />
-                </Picker>
-                {/* <CustomTextInput
-                  placeholder={'BirthDay'}
-                  focusInput={focusBirthDay}
-                  value={birthday}
-                  onChangeFocus={() => setFocusBirthDay(true)}
-                  onChageBlur={() => setFocusBirthDay(false)}
-                  autoFocus={focusBirthDay}
-                  onChangeText={onChangeBirthday}
-                  keyboardType={'default'}
-                /> */}
-                {/* <DatePicker
-                  modal
-                  mode="date"
-                  open={open}
-                  date={birthday}
-                  onConfirm={date => {
-                    setOpen(false);
-                    setBirthDay(date);
-                  }}
-                  onCancel={() => {
-                    setOpen(false);
-                  }}
-                /> */}
+                <View style={styles.dropDownContainer}>
+                  <Text>Gender:</Text>
+                  <SelectDropdown
+                    buttonTextStyle={styles.dropDownTextStyle}
+                    dropdownStyle={styles.dropDownStyles}
+                    buttonStyle={styles.dropDownButton}
+                    rowStyle={styles.rowStyle}
+                    data={genderDropdata}
+                    onSelect={(selectedItem, index) => {
+                      setGender(selectedItem);
+                      console.log(gender);
+                    }}
+                    buttonTextAfterSelection={(selectedItem, index) => {
+                      // text represented after item is selected
+                      // if data array is an array of objects then return selectedItem.property to render after item is selected
+                      return selectedItem;
+                    }}
+                    rowTextForSelection={(item, index) => {
+                      // text represented for each item in dropdown
+                      // if data array is an array of objects then return item.property to represent item in dropdown
+                      return item;
+                    }}
+                  />
+                </View>
+                <View style={styles.datePicker}>
+                  <Text style={styles.dobTitle}>Date of birth:</Text>
+                  <View style={styles.dobContent}>
+                    <Text
+                      onPress={() => {
+                        setOpen(true);
+                      }}>
+                      {birthday.toDateString()}
+                    </Text>
+                  </View>
+
+                  <DatePicker
+                    modal
+                    mode="date"
+                    open={open}
+                    date={birthday}
+                    onConfirm={date => {
+                      setOpen(false);
+                      setBirthDay(date);
+                    }}
+                    onCancel={() => {
+                      setOpen(false);
+                    }}
+                  />
+                </View>
               </View>
             </View>
-            <View style={{alignItems: 'center'}}>
+            <View style={styles.updateButton}>
               <CustomButton
-                activeBy={fullName && email}
+                activeBy={fullName && email && gender && birthday}
                 title={'Update'}
                 onPress={onPressUpdateProfile}
               />
@@ -133,20 +161,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     alignItems: 'center',
   },
-  innerContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
+  innerContainer: {},
   headerContainer: {alignItems: 'center'},
   inner: {
+    flex: 1,
     width: '100%',
   },
   inputArea: {
-    width: '100%',
+    flex: 1,
   },
   checkboxandDatePicker: {
-    flex: 1,
+    width: '100%',
     flexDirection: 'row',
-    backgroundColor: 'red',
+    justifyContent: 'space-around',
+  },
+  dropDownContainer: {
+    width: '40%',
+  },
+  dropDownButton: {
+    height: 30,
+    borderBottomColor: '#1A4F8B',
+    borderBottomWidth: 1,
+    borderRadius: 10,
+    backgroundColor: 'white',
+    marginTop: 10,
+    width: '100%',
+  },
+  dropDownStyles: {
+    borderRadius: 10,
+  },
+  dropDownTextStyle: {
+    fontSize: 14,
+  },
+  rowStyle: {
+    height: 30,
+    borderBottomColor: '#1A4F8B',
+    borderBottomWidth: 1,
+    borderRadius: 10,
+  },
+  dobTitle: {
+    marginBottom: 10,
+  },
+  datePicker: {},
+  updateButton: {alignItems: 'center', marginBottom: 30},
+  dobContent: {
+    padding: 6,
+    borderBottomColor: '#1A4F8B',
+    borderBottomWidth: 1,
+    borderRadius: 10,
+    backgroundColor: 'white',
   },
 });
