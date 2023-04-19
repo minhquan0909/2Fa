@@ -26,7 +26,7 @@ const ProfileScreen = ({navigation}) => {
   const onChangeName = value => {
     setFullName(value);
   };
- 
+
   const onChangeEmail = value => {
     setEmail(value);
   };
@@ -71,16 +71,6 @@ const ProfileScreen = ({navigation}) => {
                 onChangeText={onChangeEmail}
                 keyboardType={'default'}
               />
-              {/* <CustomTextInput
-                placeholder={'BirthDay'}
-                focusInput={focusBirthDay}
-                value={birthday.toDateString()}
-                onChangeFocus={() => setFocusBirthDay(true)}
-                onChageBlur={() => setFocusBirthDay(false)}
-                autoFocus={focusBirthDay}
-                onChangeText={onChangeBirthday}
-                keyboardType={'default'}
-              /> */}
               <View style={styles.checkboxandDatePicker}>
                 <View style={styles.dropDownContainer}>
                   <Text>Gender:</Text>

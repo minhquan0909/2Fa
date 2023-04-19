@@ -8,13 +8,14 @@ import HomeScreen from './src/screens/HomeScreen';
 import InputOTPScreen from './src/screens/InputOTPScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import SettingScreen from './src/screens/SettingScreen';
 
 const Stack = createNativeStackNavigator();
 
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Setting">
         <Stack.Screen
           name="Home"
           component={HomeScreen}
@@ -32,6 +33,15 @@ function App() {
           component={CreateAccountScreen}
           options={{
             title: 'Create Account',
+            headerBackTitle: '',
+            headerLeft: undefined,
+          }}
+        />
+        <Stack.Screen
+          name="Setting"
+          component={SettingScreen}
+          options={{
+            title: 'Setting',
             headerBackTitle: '',
             headerLeft: undefined,
           }}

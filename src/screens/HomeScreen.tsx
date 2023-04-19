@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {
   FlatList,
   Image,
+  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,10 +16,14 @@ import Reddit_IC from '../assets/red_ic.png';
 import SettingIC from '../assets/setting_ic.png';
 import Tele_IC from '../assets/telegram_ic.png';
 import CustomHeader from '../components/CustomHeader';
-const HomeScreen = () => {
+import MenuBar_IC from '../assets/menubar_ic.png';
+import {SafeAreaView} from 'react-native-safe-area-context';
+const HomeScreen = ({navigation}) => {
   const [selelectedCode, setSelectedCode] = useState();
   const [randomNumber, setRandomNumber] = useState(981232);
   const [counter, setCounter] = useState(30);
+  const [modalSettingsVisible, setModalSettingsVisible] = useState(false);
+  const [modalFeaturesVisible, setModalFeaturesVisible] = useState(false);
   // useEffect(() => {
   //   countDown();
   // }, []);
@@ -51,11 +56,17 @@ const HomeScreen = () => {
       </TouchableOpacity>
     );
   };
-  
+  const onPressSetting = () => {
+    navigation.navigate('Setting');
+  };
+  const onPressFeature = () => {};
   return (
     <View style={styles.container}>
       <View style={styles.topBarContainer}>
-        <TouchableOpacity>
+        <TouchableOpacity style={styles.topButton} onPress={onPressFeature}>
+          <Image source={MenuBar_IC} style={styles.settingIC} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.topButton} onPress={onPressSetting}>
           <Image source={SettingIC} style={styles.settingIC} />
         </TouchableOpacity>
       </View>
@@ -90,7 +101,18 @@ const HomeScreen = () => {
 export default React.memo(HomeScreen);
 const styles = StyleSheet.create({
   container: {flex: 1, alignItems: 'center'},
-  topBarContainer: {alignSelf: 'flex-end', marginRight: 10, marginTop: 10},
+  topBarContainer: {
+    // alignSelf: 'flex-end',
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 15,
+  },
+  topButton: {
+    backgroundColor: 'white',
+    padding: 5,
+    borderRadius: 15,
+  },
   settingIC: {
     width: 30,
     height: 30,
@@ -130,7 +152,6 @@ const styles = StyleSheet.create({
   codeListArea: {
     marginTop: 20,
     backgroundColor: 'white',
-    height: 230,
     width: '90%',
     borderRadius: 10,
     justifyContent: 'center',
@@ -165,5 +186,9 @@ const styles = StyleSheet.create({
   flatListContainer: {
     width: '100%',
     paddingHorizontal: 10,
+  },
+  settingModal: {
+    flex: 1,
+    backgroundColor: 'white',
   },
 });
