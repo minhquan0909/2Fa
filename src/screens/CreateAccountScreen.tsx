@@ -11,20 +11,36 @@ import CreateAccountIMG from '../assets/CreateAccount.png';
 import CustomButton from '../components/CustomButton';
 import CustomHeader from '../components/CustomHeader';
 import CustomTextInput from '../components/CustomTextInput';
+import {useSelector} from 'react-redux';
+import axios from 'axios';
+import {UpdatePassword} from '../modules/signup';
 const CreateAccountScreen = ({navigation}) => {
   const [focusPassword, setFocusPassword] = useState(true);
   const [focusConfirmPassword, setFocusConfirmPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
+  const userProfile = useSelector(state => state.profile);
+  // console.log('userProfile', userProfile);
   const onChangePassword = password => {
     setPassword(password);
   };
   const onChangeConfirmPW = confirmPW => {
     setConfirmPassword(confirmPW);
   };
-  const onPressCreateAccount = () => {
+  const onPressCreateAccount = async () => {
     if (password === confirmPassword) {
+      //Password Match
+      const res = await UpdatePassword(
+        userProfile?.id?.toString(),
+        userProfile.session_id,
+        password,
+      );
+      console.log(res.data);
+      if (!res.success) {
+        Alert.alert(res.message);
+        return;
+      }
+      Alert.alert(res.message);
       navigation.navigate('Profile');
     } else {
       Alert.alert('Password do not match');

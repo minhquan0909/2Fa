@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   KeyboardAvoidingView,
   StyleSheet,
@@ -12,6 +12,9 @@ import ProfileIMG from '../assets/UpdateProfile.png';
 import CustomButton from '../components/CustomButton';
 import CustomHeader from '../components/CustomHeader';
 import CustomTextInput from '../components/CustomTextInput';
+import {useSelector} from 'react-redux';
+import {UpdateProfile} from '../modules/signup';
+
 const ProfileScreen = ({navigation}) => {
   const [gender, setGender] = useState(null);
   const [birthday, setBirthDay] = useState(new Date());
@@ -22,17 +25,41 @@ const ProfileScreen = ({navigation}) => {
   const [focusBirthDay, setFocusBirthDay] = useState(false);
   const [focusEmail, setFocusEmail] = useState(false);
   const [focusGender, setForcusGender] = useState(false);
+  const [userName, setUserName] = useState();
+  const [focusUserName, setFocusUserName] = useState();
+
   const genderDropdata = ['male', 'female', 'others'];
+  const UserProfile = useSelector(state => state.profile);
+  console.log(UserProfile);
+  useEffect(() => {
+    setGender(UserProfile.gender);
+    // setBirthDay(UserProfile.birthday);
+    setFullName(UserProfile.full_name);
+    setEmail(UserProfile.email);
+  }, []);
   const onChangeName = value => {
     setFullName(value);
   };
-
+  // useEffect(() => {});
   const onChangeEmail = value => {
     setEmail(value);
   };
-  const onPressUpdateProfile = () => {
+  const onChangeUserName = value => {
+    setUserName(value);
+  };
+  const onPressUpdateProfile = async () => {
     if (fullName && gender && birthday && email) {
-      navigation.navigate('Home');
+      const res = await UpdateProfile(
+        UserProfile.id.toString(),
+        UserProfile.session_id,
+        userName,
+        gender,
+        fullName,
+        birthday.toISOString().split('T')[0],
+        email,
+      );
+
+      // navigation.navigate('Home');
     }
   };
 
@@ -51,6 +78,16 @@ const ProfileScreen = ({navigation}) => {
               containerStyle={styles.headerContainer}
             />
             <View style={styles.inputArea}>
+              <CustomTextInput
+                placeholder={'User name'}
+                focusInput={focusUserName}
+                value={userName}
+                onChangeFocus={() => setFocusUserName(true)}
+                onChageBlur={() => setFocusUserName(false)}
+                autoFocus={focusUserName}
+                onChangeText={onChangeUserName}
+                keyboardType={'default'}
+              />
               <CustomTextInput
                 placeholder={'Full name'}
                 focusInput={focusFullName}

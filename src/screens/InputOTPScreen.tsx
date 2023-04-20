@@ -6,15 +6,25 @@ import {
   KeyboardAvoidingView,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
+import {GetOTP, VerifyOTP} from '../modules/signup';
+import {useDispatch, useSelector} from 'react-redux';
+import {updateProfile} from '../redux/profile';
+
 const InputOTPScreen = ({navigation}) => {
   let textInput = useRef(null);
   let clockCall: any = null;
-  const lengthInput = 6;
+  const lengthInput = 4;
   const defaultCountDown = 30;
   const [internalValue, setInternalValue] = useState('');
   const [countDown, setCountDown] = useState(defaultCountDown);
   const [enableResend, setEnableResend] = useState(false);
+  const userPhone = useSelector(state => state.auththentication);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    GetOTP(userPhone.calling_code, userPhone.phone);
+  }, []);
   useEffect(() => {
     textInput.focus();
   }, []);
@@ -35,9 +45,24 @@ const InputOTPScreen = ({navigation}) => {
       setCountDown(countDown - 1);
     }
   };
-  const onChangedText = value => {
+  const onChangedText = async value => {
     setInternalValue(value);
     if (value.length === lengthInput) {
+      const res = await VerifyOTP(
+        userPhone.calling_code,
+        userPhone.phone,
+        value,
+        'register',
+      );
+      // console.log(res);
+      if (!res.success) {
+        Alert.alert(res.message);
+        return;
+      }
+      //Correct OTP
+      console.log('CorrectOTP', res.data);
+      //  dispatch(update)
+      dispatch(updateProfile(res.data));
       navigation.navigate('CreateAccount');
     }
   };

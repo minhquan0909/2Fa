@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {
+  Alert,
   FlatList,
   KeyboardAvoidingView,
   Modal,
@@ -16,40 +17,55 @@ import ForgotPWIMG from '../assets/ForgotPW.png';
 import LoginIMG from '../assets/Login.png';
 import CustomButton from '../components/CustomButton';
 import CustomHeader from '../components/CustomHeader';
+import {CheckPhoneCanRegister, SendOTP} from '../modules/signup';
+import CustomTextInput from '../components/CustomTextInput';
+import {useDispatch, useSelector} from 'react-redux';
+import {savePhoneNumber} from '../redux/auththentication';
 
 const LoginScreen = ({navigation}) => {
   const defaultCountryCode = '+84';
   const defaultMaskCountry = '39 666 1101';
   const loginTitle = 'Welcome Back';
   const desc = 'Please input you phone number';
-  const forgotPWTitle = 'Forgot Password';
+  const signUpTitle = 'Create new account';
   const [phoneNumber, setPhoneNumber] = useState();
   const [focusInput, setFocusInput] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [countriesData, setCountriesData] = useState(Countries);
   const [codeCountry, setCodeCountry] = useState(defaultCountryCode);
   const [placeholder, setPlaceHolder] = useState(defaultMaskCountry);
-  const [loginOrForgetPw, setLoginOrForgotPW] = useState(true); //Login:true ForgotPw:false
+  const [signInOrSignUp, setSignInOrSignUp] = useState(true); //Login:true Register:false
+  const [password, setPassword] = useState('');
+  const [focusPassword, setFocusPassword] = useState(false);
+  const phoneData = useSelector(state => state.auththentication);
+  const dispatch = useDispatch();
   const onShowModal = () => {
     setModalVisible(!modalVisible);
   };
   const onChangePhone = number => {
     setPhoneNumber(number);
   };
-  const onPressLogin = () => {
-    // const langCode = 'vi';
-    // const baseURL = 'https://helpmiee.com/api/';
-    // const loginUrl = `${langCode}/login.json`;
+  const onPressLogin = async () => {
+    // if (signInOrSignUp) {
+    //   navigation.navigate('Home');
+    // } else {
+    //   navigation.navigate('InputOTP');
+    // }
+  };
+  const onPressCreateAccount = async () => {
+    const res = await CheckPhoneCanRegister(phoneNumber, '84');
+    if (!res.success) {
+      Alert.alert(res.message);
+      return;
+    }
+    const newUserData = res.data;
+    console.log(newUserData);
+    dispatch(savePhoneNumber(newUserData));
 
-    // const res = await axios.post(baseURL + loginUrl, {
-    //   calling_code: '84',
-    //   phone: '396661101',
-    //   password: 'Aa@123456',
-    // });
-
-    // const data = await res.data;
-    // console.log(data);
-    if (phoneNumber) {
+    console.log('phoneData', phoneData);
+    const OTPSend = await SendOTP(newUserData.phone, newUserData.calling_code);
+    if (OTPSend.success) {
+      Alert.alert(OTPSend.message);
       navigation.navigate('InputOTP');
     }
   };
@@ -65,7 +81,7 @@ const LoginScreen = ({navigation}) => {
     onShowModal();
   };
   const changeLoginOrForgotPW = () => {
-    setLoginOrForgotPW(!loginOrForgetPw);
+    setSignInOrSignUp(!signInOrSignUp);
   };
 
   const filterCountries = value => {
@@ -126,9 +142,9 @@ const LoginScreen = ({navigation}) => {
         behavior="padding"
         style={styles.keyboardAvoidingViewContainer}>
         <CustomHeader
-          title={loginOrForgetPw ? loginTitle : forgotPWTitle}
+          title={signInOrSignUp ? loginTitle : signUpTitle}
           description={desc}
-          imgSource={loginOrForgetPw ? LoginIMG : ForgotPWIMG}
+          imgSource={signInOrSignUp ? LoginIMG : ForgotPWIMG}
         />
         <View
           style={[
@@ -153,11 +169,25 @@ const LoginScreen = ({navigation}) => {
             autoFocus={focusInput}
           />
         </View>
+        {signInOrSignUp ? (
+          <CustomTextInput
+            placeholder={'Password'}
+            keyboardType={'default'}
+            value={password}
+            onChangeText={input => setPassword(input)}
+            onChangeFocus={() => setFocusPassword(true)}
+            onChageBlur={() => setFocusPassword(false)}
+            autoFocus={focusPassword}
+            focusInput={focusPassword}
+          />
+        ) : (
+          ''
+        )}
         <View style={styles.forgotPWContainer}>
           <TouchableOpacity hitSlop={20} onPress={changeLoginOrForgotPW}>
             <Text style={styles.textForgotPw}>
-              {loginOrForgetPw === true
-                ? 'Forgot Password ?'
+              {signInOrSignUp === true
+                ? 'Create new accounts'
                 : 'Already have account'}
             </Text>
           </TouchableOpacity>
@@ -166,7 +196,7 @@ const LoginScreen = ({navigation}) => {
           <CustomButton
             activeBy={phoneNumber}
             title={'Send OTP'}
-            onPress={onPressLogin}
+            onPress={signInOrSignUp ? onPressLogin : onPressCreateAccount}
           />
         </View>
       </KeyboardAvoidingView>
