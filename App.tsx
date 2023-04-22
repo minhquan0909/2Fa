@@ -11,13 +11,14 @@ import ProfileScreen from './src/screens/ProfileScreen';
 import SettingScreen from './src/screens/SettingScreen';
 import store from './src/redux/store';
 import {Provider} from 'react-redux';
+import QRCodeScreen from './src/components/QRCodeScreen';
 const Stack = createNativeStackNavigator();
 
 function App() {
   return (
     <Provider store={store}>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Login">
+        <Stack.Navigator initialRouteName="Home">
           <Stack.Screen
             name="Home"
             component={HomeScreen}
@@ -52,6 +53,7 @@ function App() {
               headerLeft: undefined,
             }}
           />
+         
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>
