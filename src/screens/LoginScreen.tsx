@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Alert,
   FlatList,
@@ -17,15 +17,22 @@ import ForgotPWIMG from '../assets/ForgotPW.png';
 import LoginIMG from '../assets/Login.png';
 import CustomButton from '../components/CustomButton';
 import CustomHeader from '../components/CustomHeader';
-import {CheckPhoneCanRegister, SendOTP} from '../modules/signup';
+import {
+  CheckPhoneCanRegister,
+  Login,
+  ReLogin,
+  SendOTP,
+  UpdateProfile,
+} from '../modules/signup';
 import CustomTextInput from '../components/CustomTextInput';
 import {useDispatch, useSelector} from 'react-redux';
-import {savePhoneNumber} from '../redux/auththentication';
+import {savePhoneNumber} from '../redux/auththenSlice';
+import {updateProfile} from '../redux/profileSlice';
 
 const LoginScreen = ({navigation}) => {
   const defaultCountryCode = '+84';
   const defaultMaskCountry = '39 666 1101';
-  const loginTitle = 'Welcome Back';
+  const loginTitle = 'Login';
   const desc = 'Please input you phone number';
   const signUpTitle = 'Create new account';
   const [phoneNumber, setPhoneNumber] = useState();
@@ -37,8 +44,11 @@ const LoginScreen = ({navigation}) => {
   const [signInOrSignUp, setSignInOrSignUp] = useState(true); //Login:true Register:false
   const [password, setPassword] = useState('');
   const [focusPassword, setFocusPassword] = useState(false);
-  const phoneData = useSelector(state => state.auththentication);
+  const [visiblePopUp, setVisiblePopUp] = useState(false);
+  const [loginDirectly, setLoginDirectly] = useState(false);
+  const phoneData = useSelector(state => state.authen);
   const dispatch = useDispatch();
+  // console.log('PhoneDAta', phoneData);
   const onShowModal = () => {
     setModalVisible(!modalVisible);
   };
@@ -46,11 +56,38 @@ const LoginScreen = ({navigation}) => {
     setPhoneNumber(number);
   };
   const onPressLogin = async () => {
-    // if (signInOrSignUp) {
-    //   navigation.navigate('Home');
-    // } else {
-    //   navigation.navigate('InputOTP');
-    // }
+    const res = await Login('84', phoneNumber, password);
+    console.log(res);
+    if (!res.success) {
+      Alert.alert(res.message);
+      return;
+    }
+    Alert.alert(res.message);
+    dispatch(updateProfile(res.data));
+
+    navigation.navigate('Home');
+  };
+  // const profile = useSelector(state => state.profile);
+  // console.log(profile);
+  useEffect(() => {
+    checkUserAlreadyLogin();
+  }, []);
+  const checkUserAlreadyLogin = async () => {
+    const res = await ReLogin(phoneData.id.toString(), phoneData.session_id);
+    console.log(res);
+    if (res.success) {
+      dispatch(updateProfile(res.data));
+      setVisiblePopUp(true);
+      // Alert.alert('Welcome Back ' + phoneData?.data.username);
+    }
+    // console.log('Login OK', res);
+  };
+  const OnSelectLogin = () => {
+    setVisiblePopUp(false);
+    navigation.navigate('Home');
+  };
+  const OnSelectUseAnotherAccount = () => {
+    setVisiblePopUp(false);
   };
   const onPressCreateAccount = async () => {
     const res = await CheckPhoneCanRegister(phoneNumber, '84');
@@ -62,7 +99,6 @@ const LoginScreen = ({navigation}) => {
     console.log(newUserData);
     dispatch(savePhoneNumber(newUserData));
 
-    console.log('phoneData', phoneData);
     const OTPSend = await SendOTP(newUserData.phone, newUserData.calling_code);
     if (OTPSend.success) {
       Alert.alert(OTPSend.message);
@@ -93,6 +129,34 @@ const LoginScreen = ({navigation}) => {
     } else {
       setCountriesData(Countries);
     }
+  };
+
+  const renderLoginPopUp = () => {
+    return (
+      <Modal animationType="slide" transparent={false} visible={visiblePopUp}>
+        <View style={styles.popUpContainer}>
+          <View style={styles.popUp}>
+            <View style={styles.textArea}>
+              <Text style={styles.title}>Welcome Back</Text>
+              <Text style={styles.userName}>{phoneData.username}</Text>
+              <Text>Please choose your option</Text>
+            </View>
+            <View style={styles.buttonArea}>
+              <TouchableOpacity
+                style={styles.popUpButton}
+                onPress={OnSelectLogin}>
+                <Text>Login</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.popUpButton}
+                onPress={OnSelectUseAnotherAccount}>
+                <Text>Use other account</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
   };
   let renderModal = () => {
     return (
@@ -137,6 +201,7 @@ const LoginScreen = ({navigation}) => {
   };
   return (
     <View style={styles.container}>
+      {renderLoginPopUp()}
       <KeyboardAvoidingView
         keyboardVerticalOffset={50}
         behavior="padding"
@@ -195,7 +260,7 @@ const LoginScreen = ({navigation}) => {
         <View style={styles.bottomView}>
           <CustomButton
             activeBy={phoneNumber}
-            title={'Send OTP'}
+            title={signInOrSignUp ? 'Login' : 'Send OTP'}
             onPress={signInOrSignUp ? onPressLogin : onPressCreateAccount}
           />
         </View>
@@ -295,4 +360,45 @@ const styles = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
   },
+  popUpContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  popUp: {
+    width: 300,
+    height: 200,
+    borderRadius: 10,
+    borderColor: 'orange',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    borderWidth: 1,
+  },
+  buttonArea: {
+    // flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+  textArea: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  popUpButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+    borderColor: 'orange',
+    backgroundColor: 'white',
+    borderWidth: 0.5,
+    margin: 5,
+  },
+  userName: {
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+
 });

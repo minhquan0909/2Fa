@@ -3,7 +3,7 @@ import {Image, StyleSheet, Text, View} from 'react-native';
 const CustomHeader = props => {
   const {imgSource, title, description, containerStyle} = props;
   return (
-    <View style={containerStyle}>
+    <View style={[styles.containerStyle, containerStyle]}>
       <Text style={styles.introTitle}>{title}</Text>
       <Image source={imgSource} style={styles.imgLogin} />
       <Text style={styles.textTitle}>{description}</Text>

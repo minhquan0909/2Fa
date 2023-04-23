@@ -11,28 +11,15 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 import HomeIMG from '../assets/HomeIMG.png';
 import AddNewIC from '../assets/add_ic.png';
 import CoppyIC from '../assets/copy_ic.png';
-import FB_IC from '../assets/fb_ic.png';
-import Insta_IC from '../assets/insta_ic.png';
-import Reddit_IC from '../assets/red_ic.png';
 import SettingIC from '../assets/setting_ic.png';
 import Tele_IC from '../assets/telegram_ic.png';
 import CustomHeader from '../components/CustomHeader';
 import CustomTextInput from '../components/CustomTextInput';
-import {useDispatch, useSelector} from 'react-redux';
-import {addKey} from '../redux/secretKey';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-// Create a new TOTP object.
-let totp = new OTPAuth.TOTP({
-  issuer: 'ACME',
-  label: 'AzureDiamond',
-  algorithm: 'SHA1',
-  digits: 6,
-  period: 5,
-  secret: 'NB2W45DFOIZA', // or 'OTPAuth.Secret.fromBase32("NB2W45DFOIZA")'
-});
+import {addKey, removeKey, updateKey} from '../redux/secretSlice';
 
 const HomeScreen = ({navigation}) => {
   const [oTPgen, setOTPgen] = useState('------');
@@ -42,21 +29,14 @@ const HomeScreen = ({navigation}) => {
   const [modalFeaturesVisible, setModalFeaturesVisible] = useState(false);
   const [secretKeyList, setSecretKeyList] = useState([]);
   const [selectedValue, setSelecedValue] = useState();
-  const [selectedItem, setSelectedItem] = useState();
+  const dispatch = useDispatch();
+  const secretKeyStore = useSelector(state => state.secret.keys);
+  const [isUpdate, setIsUpdate] = useState(false); //create=true
+  const [selectedItemID, setSelectedItemID] = useState();
 
-  const getAllData = async () => {
-    try {
-      const keys = await AsyncStorage.getAllKeys();
-      const items = await AsyncStorage.multiGet(keys);
-      const parsedData = items.map(item => ({name: item[0], value: item[1]}));
-      setSecretKeyList(parsedData);
-    } catch (error) {
-      console.log(error);
-    }
-  };
   useEffect(() => {
-    getAllData();
-  }, []);
+    setSecretKeyList(secretKeyStore);
+  }, [secretKeyStore]);
   // console.log(secretKeyList);
   const onPressCopyCode = () => {
     console.log(oTPgen);
@@ -66,9 +46,14 @@ const HomeScreen = ({navigation}) => {
     setSecretValue('');
     setModalFeaturesVisible(!modalFeaturesVisible);
   };
-
+  const OnPressDelete = () => {
+    dispatch(removeKey({id: selectedItemID}));
+    setIsUpdate(false);
+    setModalFeaturesVisible(false);
+  };
   const renderItem = ({index, item}) => {
     const onPressAuthenItem = () => {
+      setSelectedItemID(item.id);
       console.log('currentkey', selectedValue);
       setSelecedValue(item.value);
       console.log('selectedKey', item.value);
@@ -82,8 +67,9 @@ const HomeScreen = ({navigation}) => {
         secret: item.value, // or 'OTPAuth.Secret.fromBase32("NB2W45DFOIZA")'
       });
       if (curentSelectedKey !== selectedValue) {
+        newTotp.secret = selectedValue;
         const countDown = setInterval(() => {
-          console.log(newTotp);
+          // console.log(newTotp);
           const now = Math.floor(Date.now() / 1000);
           const timeRemaining = 30 - (now % 30); //Create timer
           const otpCode = newTotp.generate(); //OTP genegrate
@@ -95,7 +81,11 @@ const HomeScreen = ({navigation}) => {
       }
     };
     const onLongPressAuthenItem = () => {
-      Alert.alert('Modify');
+      setSelectedItemID(item.id);
+      setModalFeaturesVisible(true);
+      setIsUpdate(true);
+      setSecretKeyName(item.name);
+      setSecretValue(item.value);
     };
     return (
       <TouchableOpacity
@@ -112,18 +102,38 @@ const HomeScreen = ({navigation}) => {
   const onPressSetting = () => {
     navigation.navigate('Setting');
   };
+  const DispatchAddKey = () => {
+    const randomNumber =
+      Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+    dispatch(
+      addKey({id: randomNumber, name: secretKeyName, value: secretValue}),
+    );
+    Alert.alert('Your key have been create');
+  };
+  const DispatchUpdateKey = () => {
+    dispatch(
+      updateKey({id: selectedItemID, name: secretKeyName, value: secretValue}),
+    );
+    setIsUpdate(false);
+    Alert.alert('Your key have been update');
+  };
+
   const OnPressSaveKey = async () => {
     // console.log('Show QR CODE');
     if (secretKeyName && secretValue) {
       // dispatch(addKey({secretKeyName, secretValue}));
-      await AsyncStorage.setItem(secretKeyName, secretValue);
-      Alert.alert('Your key have been save');
-      getAllData();
+      if (isUpdate === false) {
+        DispatchAddKey();
+      } else {
+        DispatchUpdateKey();
+      }
+      // getAllData();
       setModalFeaturesVisible(false);
     }
   };
   // const devices = useCameraDevices('wide-angle-camera');
   // const device = devices.back;
+  // AsyncStorage.clear()
   const renderPopUpModal = () => {
     return (
       <Modal
@@ -141,22 +151,37 @@ const HomeScreen = ({navigation}) => {
               isActive={true}
             /> */}
             <View style={styles.popupBackground}>
-              <Text>Input your OTP</Text>
+              <Text style={styles.popUpTitle}>Input your OTP</Text>
               <CustomTextInput
                 placeholder={'Secret key name'}
                 value={secretKeyName}
                 onChangeText={value => setSecretKeyName(value)}
                 keyboardType={'default'}
+                containerStyle={styles.popUPTextInputContainer}
               />
               <CustomTextInput
                 placeholder={'Secret value'}
                 value={secretValue}
                 onChangeText={value => setSecretValue(value)}
                 keyboardType={'default'}
+                containerStyle={styles.popUPTextInputContainer}
               />
-              <TouchableOpacity onPress={OnPressSaveKey}>
-                <Text>Save</Text>
-              </TouchableOpacity>
+              <View style={styles.popUpButtonArea}>
+                <TouchableOpacity
+                  style={styles.buttonSave}
+                  onPress={OnPressSaveKey}>
+                  <Text>Save</Text>
+                </TouchableOpacity>
+                {isUpdate ? (
+                  <TouchableOpacity
+                    style={[styles.buttonSave, {backgroundColor: 'pink'}]}
+                    onPress={OnPressDelete}>
+                    <Text>Delete</Text>
+                  </TouchableOpacity>
+                ) : (
+                  ''
+                )}
+              </View>
             </View>
           </View>
         </TouchableWithoutFeedback>
@@ -193,7 +218,7 @@ const HomeScreen = ({navigation}) => {
         </View>
       </View>
       <View style={styles.codeListArea}>
-        <View style={styles.flatListContainer}>
+        <View style={[styles.flatListContainer, {height: 60}]}>
           <TouchableOpacity onPress={OnpressCreateNewKey}>
             <View style={styles.listItem}>
               <Image source={AddNewIC} style={styles.itemIconIMG} />
@@ -202,9 +227,10 @@ const HomeScreen = ({navigation}) => {
           </TouchableOpacity>
         </View>
         <FlatList
-          style={[styles.flatListContainer, {marginBottom: 100}]}
+          style={[styles.flatListContainer]}
           data={secretKeyList}
           renderItem={renderItem}
+          disableIntervalMomentum={true}
         />
       </View>
     </View>
@@ -297,6 +323,7 @@ const styles = StyleSheet.create({
   flatListContainer: {
     width: '100%',
     paddingHorizontal: 10,
+    height: 150,
   },
   counterContainer: {
     backgroundColor: 'white',
@@ -313,12 +340,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   popupBackground: {
-    backgroundColor: 'orange',
     width: 300,
     height: 200,
-    borderRadius: 15,
+    borderRadius: 10,
+    borderColor: 'orange',
     alignItems: 'center',
-    paddingHorizontal: 10,
+    justifyContent: 'space-evenly',
+    borderWidth: 1,
+    padding: 10,
   },
   modalButton: {
     backgroundColor: 'white',
@@ -327,4 +356,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
+  popUPTextInputContainer: {
+    borderColor: 'orange',
+    borderWidth: 0.5,
+    borderBottomColor: 'orange',
+    borderBottomWidth: 0.5,
+  },
+  popUpTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  buttonSave: {
+    backgroundColor: 'orange',
+    paddingVertical: 8,
+    paddingHorizontal: 30,
+    borderRadius: 5,
+    marginVertical: 5,
+  },
+  popUpButtonArea: {flexDirection: 'row', justifyContent: 'space-evenly'},
 });

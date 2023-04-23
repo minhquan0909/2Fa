@@ -1,5 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
-export const auththentication = createSlice({
+export const athenSlice = createSlice({
   name: 'auth',
   initialState: {
     calling_code: '',
@@ -15,6 +15,6 @@ export const auththentication = createSlice({
     },
   },
 });
-export const {savePhoneNumber} = auththentication.actions;
+export const {savePhoneNumber} = athenSlice.actions;
 
-export default auththentication.reducer;
+export default athenSlice.reducer;

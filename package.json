@@ -29,7 +29,9 @@
     "react-native-vision-camera": "^2.15.4",
     "react-redux": "^8.0.5",
     "redux": "^4.2.1",
-    "redux-saga": "^1.2.3"
+    "redux-persist": "^6.0.0",
+    "redux-saga": "^1.2.3",
+    "redux-starter-kit": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

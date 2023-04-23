@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import {GetOTP, VerifyOTP} from '../modules/signup';
 import {useDispatch, useSelector} from 'react-redux';
-import {updateProfile} from '../redux/profile';
+import {updateProfile} from '../redux/profileSlice';
 
 const InputOTPScreen = ({navigation}) => {
   let textInput = useRef(null);
@@ -20,7 +20,7 @@ const InputOTPScreen = ({navigation}) => {
   const [internalValue, setInternalValue] = useState('');
   const [countDown, setCountDown] = useState(defaultCountDown);
   const [enableResend, setEnableResend] = useState(false);
-  const userPhone = useSelector(state => state.auththentication);
+  const userPhone = useSelector(state => state.authen);
   const dispatch = useDispatch();
   useEffect(() => {
     GetOTP(userPhone.calling_code, userPhone.phone);
@@ -61,7 +61,6 @@ const InputOTPScreen = ({navigation}) => {
       }
       //Correct OTP
       console.log('CorrectOTP', res.data);
-      //  dispatch(update)
       dispatch(updateProfile(res.data));
       navigation.navigate('CreateAccount');
     }

@@ -1,11 +1,12 @@
 import {configureStore} from '@reduxjs/toolkit';
-import profile from './profile';
-import auththentication from './auththentication';
-import secretKey from './secretKey';
-export default configureStore({
-  reducer: {
-    profile,
-    auththentication,
-    secretKey,
-  },
+import {persistStore} from 'redux-persist';
+import rootReducer from './rootReducer';
+const store = configureStore({
+  reducer: rootReducer,
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
 });
+const persistor = persistStore(store);
+export {store, persistor};

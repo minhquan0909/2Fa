@@ -7,6 +7,10 @@ const GetOTPApi = `/${lang}/otp/view/`;
 const VerifyOTPApi = `/${lang}/otp/verify.json`;
 const UpdatePasswordApi = `/${lang}/password/update.json`;
 const UpdateProfileApi = `/${lang}/profile/update.json`;
+const CheckExistAPI = `/${lang}/phone-exists.json`;
+const ReLoginAPI = `/${lang}/relogin.json`;
+const LoginAPI = `/${lang}/login.json`;
+
 export const CheckPhoneCanRegister = async (phone, callingCode) => {
   const res = await axios.post(BaseURL + CheckPhoneApi, {
     calling_code: callingCode,
@@ -67,7 +71,30 @@ export const UpdateProfile = async (
     birthday,
     email,
   });
-  console.log('UpdateProfile', res.data);
-  console.log(user, session_id, username, gender, full_name, birthday, email);
+  // console.log('UpdateProfile', res.data);
+  return res.data;
+};
+export const CheckPhoneExist = async (calling_code, phone) => {
+  const res = await axios.post(BaseURL + CheckExistAPI, {
+    calling_code,
+    phone,
+  });
+  console.log('CheckPhoneExist', res.data);
+  return res.data;
+};
+export const ReLogin = async (user, session_id) => {
+  const res = await axios.post(BaseURL + ReLoginAPI, {
+    user,
+    session_id,
+  });
+  // console.log('ReLogin', res.data);
+  return res.data;
+};
+export const Login = async (calling_code, phone, password) => {
+  const res = await axios.post(BaseURL + LoginAPI, {
+    calling_code,
+    phone,
+    password,
+  });
   return res.data;
 };

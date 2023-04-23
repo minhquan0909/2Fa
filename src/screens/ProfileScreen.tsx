@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   StyleSheet,
   Text,
@@ -58,8 +59,8 @@ const ProfileScreen = ({navigation}) => {
         birthday.toISOString().split('T')[0],
         email,
       );
-
-      // navigation.navigate('Home');
+      Alert.alert(res.message);
+      navigation.navigate('Home');
     }
   };
 

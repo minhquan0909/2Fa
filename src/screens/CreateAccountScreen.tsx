@@ -11,9 +11,11 @@ import CreateAccountIMG from '../assets/CreateAccount.png';
 import CustomButton from '../components/CustomButton';
 import CustomHeader from '../components/CustomHeader';
 import CustomTextInput from '../components/CustomTextInput';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
 import {UpdatePassword} from '../modules/signup';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {updateProfile} from '../redux/profileSlice';
 const CreateAccountScreen = ({navigation}) => {
   const [focusPassword, setFocusPassword] = useState(true);
   const [focusConfirmPassword, setFocusConfirmPassword] = useState(false);
@@ -21,6 +23,14 @@ const CreateAccountScreen = ({navigation}) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const userProfile = useSelector(state => state.profile);
   // console.log('userProfile', userProfile);
+  // const LocalStorage = async () => {
+  //   const keys = await AsyncStorage.getAllKeys();
+  //   const items = await AsyncStorage.multiGet(keys);
+  //   console.log(items);
+  //   return items;
+  // };
+  // LocalStorage();
+  const dispatch = useDispatch();
   const onChangePassword = password => {
     setPassword(password);
   };
@@ -35,11 +45,12 @@ const CreateAccountScreen = ({navigation}) => {
         userProfile.session_id,
         password,
       );
-      console.log(res.data);
+      // console.log('Creacted account', res.data);
       if (!res.success) {
         Alert.alert(res.message);
         return;
       }
+      dispatch(updateProfile(res.data));
       Alert.alert(res.message);
       navigation.navigate('Profile');
     } else {
@@ -121,7 +132,6 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 50,
   },
-
   passwordInput: {
     marginLeft: 5,
     height: 40,

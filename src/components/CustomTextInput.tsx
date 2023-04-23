@@ -10,12 +10,14 @@ function CustomTextInput(props) {
     onChageBlur,
     autoFocus,
     focusInput,
+    containerStyle,
   } = props;
   return (
     <View
       style={[
         styles.inputContainer,
         {borderBottomColor: focusInput ? '#1A4F8B' : 'white'},
+        containerStyle,
       ]}>
       <TextInput
         placeholder={placeholder}
