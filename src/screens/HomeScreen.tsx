@@ -25,10 +25,10 @@ const HomeScreen = ({navigation}) => {
   const [oTPgen, setOTPgen] = useState('------');
   const [counter, setCounter] = useState(30);
   const [secretValue, setSecretValue] = useState('');
-  const [secretKeyName, setSecretKeyName] = useState();
+  const [secretKeyName, setSecretKeyName] = useState('');
   const [modalFeaturesVisible, setModalFeaturesVisible] = useState(false);
   const [secretKeyList, setSecretKeyList] = useState([]);
-  const [selectedValue, setSelecedValue] = useState();
+  const [selectedValue, setSelecedValue] = useState('');
   const dispatch = useDispatch();
   const secretKeyStore = useSelector(state => state.secret.keys);
   const [isUpdate, setIsUpdate] = useState(false); //create=true

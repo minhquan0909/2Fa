@@ -8,9 +8,10 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import {GetOTP, VerifyOTP} from '../modules/signup';
+import {GetFunc, GetOTP, PostFunc, VerifyOTP} from '../modules/signup';
 import {useDispatch, useSelector} from 'react-redux';
 import {updateProfile} from '../redux/profileSlice';
+import {PhoneModel, VerifyOTPModel} from '../modules/model';
 
 const InputOTPScreen = ({navigation}) => {
   let textInput = useRef(null);
@@ -23,7 +24,11 @@ const InputOTPScreen = ({navigation}) => {
   const userPhone = useSelector(state => state.authen);
   const dispatch = useDispatch();
   useEffect(() => {
-    GetOTP(userPhone.calling_code, userPhone.phone);
+    const getOTPData: PhoneModel = {
+      calling_code: userPhone.calling_code,
+      phone: userPhone.phone,
+    };
+    GetFunc('GetOTP', getOTPData);
   }, []);
   useEffect(() => {
     textInput.focus();
@@ -45,23 +50,24 @@ const InputOTPScreen = ({navigation}) => {
       setCountDown(countDown - 1);
     }
   };
-  const onChangedText = async value => {
-    setInternalValue(value);
-    if (value.length === lengthInput) {
-      const res = await VerifyOTP(
-        userPhone.calling_code,
-        userPhone.phone,
-        value,
-        'register',
-      );
-      // console.log(res);
-      if (!res.success) {
-        Alert.alert(res.message);
+  const onChangedText = async OTPvalue => {
+    setInternalValue(OTPvalue);
+    if (OTPvalue.length === lengthInput) {
+      const oTPVerifyData: VerifyOTPModel = {
+        calling_code: userPhone.calling_code,
+        phone: userPhone.phone,
+        otp: OTPvalue,
+        action: 'register',
+      };
+      console.log('OTPVerifyData', oTPVerifyData);
+      const verifyOTPRes = await PostFunc('VerifyOTP', oTPVerifyData);
+      if (!verifyOTPRes.success) {
+        Alert.alert(verifyOTPRes.message);
         return;
       }
       //Correct OTP
-      console.log('CorrectOTP', res.data);
-      dispatch(updateProfile(res.data));
+      // console.log('CorrectOTP', verifyOTPRes.data);
+      dispatch(updateProfile(verifyOTPRes.data));
       navigation.navigate('CreateAccount');
     }
   };

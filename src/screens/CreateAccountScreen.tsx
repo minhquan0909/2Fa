@@ -13,23 +13,17 @@ import CustomHeader from '../components/CustomHeader';
 import CustomTextInput from '../components/CustomTextInput';
 import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
-import {UpdatePassword} from '../modules/signup';
+import {PostFunc, UpdatePassword} from '../modules/signup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {updateProfile} from '../redux/profileSlice';
+import {UpdatePasswordModel} from '../modules/model';
 const CreateAccountScreen = ({navigation}) => {
   const [focusPassword, setFocusPassword] = useState(true);
   const [focusConfirmPassword, setFocusConfirmPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const userProfile = useSelector(state => state.profile);
-  // console.log('userProfile', userProfile);
-  // const LocalStorage = async () => {
-  //   const keys = await AsyncStorage.getAllKeys();
-  //   const items = await AsyncStorage.multiGet(keys);
-  //   console.log(items);
-  //   return items;
-  // };
-  // LocalStorage();
+
   const dispatch = useDispatch();
   const onChangePassword = password => {
     setPassword(password);
@@ -40,18 +34,22 @@ const CreateAccountScreen = ({navigation}) => {
   const onPressCreateAccount = async () => {
     if (password === confirmPassword) {
       //Password Match
-      const res = await UpdatePassword(
-        userProfile?.id?.toString(),
-        userProfile.session_id,
-        password,
+      const updatePasswordData: UpdatePasswordModel = {
+        user: userProfile?.id?.toString(),
+        session_id: userProfile.session_id,
+        password: password,
+      };
+      const updatePasswordres = await PostFunc(
+        'UpdatePassword',
+        updatePasswordData,
       );
       // console.log('Creacted account', res.data);
-      if (!res.success) {
-        Alert.alert(res.message);
+      if (!updatePasswordres.success) {
+        Alert.alert(updatePasswordres.message);
         return;
       }
-      dispatch(updateProfile(res.data));
-      Alert.alert(res.message);
+      dispatch(updateProfile(updatePasswordres.data));
+      Alert.alert(updatePasswordres.message);
       navigation.navigate('Profile');
     } else {
       Alert.alert('Password do not match');

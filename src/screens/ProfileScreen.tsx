@@ -14,7 +14,8 @@ import CustomButton from '../components/CustomButton';
 import CustomHeader from '../components/CustomHeader';
 import CustomTextInput from '../components/CustomTextInput';
 import {useSelector} from 'react-redux';
-import {UpdateProfile} from '../modules/signup';
+import {PostFunc, UpdateProfile} from '../modules/signup';
+import {ProfileModel} from '../modules/model';
 
 const ProfileScreen = ({navigation}) => {
   const [gender, setGender] = useState(null);
@@ -26,7 +27,7 @@ const ProfileScreen = ({navigation}) => {
   const [focusBirthDay, setFocusBirthDay] = useState(false);
   const [focusEmail, setFocusEmail] = useState(false);
   const [focusGender, setForcusGender] = useState(false);
-  const [userName, setUserName] = useState();
+  const [userName, setUserName] = useState('');
   const [focusUserName, setFocusUserName] = useState();
 
   const genderDropdata = ['male', 'female', 'others'];
@@ -50,16 +51,21 @@ const ProfileScreen = ({navigation}) => {
   };
   const onPressUpdateProfile = async () => {
     if (fullName && gender && birthday && email) {
-      const res = await UpdateProfile(
-        UserProfile.id.toString(),
-        UserProfile.session_id,
-        userName,
-        gender,
-        fullName,
-        birthday.toISOString().split('T')[0],
-        email,
-      );
-      Alert.alert(res.message);
+      const profileData: ProfileModel = {
+        user: UserProfile.id.toString(),
+        session_id: UserProfile.session_id,
+        username: userName,
+        gender: gender,
+        full_name: fullName,
+        birthday: birthday.toISOString().split('T')[0],
+        email: email,
+      };
+      const updateProfileRes = await PostFunc('UpdateProfile', profileData);
+      if (!updateProfileRes.success) {
+        Alert.alert(updateProfileRes.message);
+        return;
+      }
+      Alert.alert(updateProfileRes.message);
       navigation.navigate('Home');
     }
   };

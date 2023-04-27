@@ -12,25 +12,20 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 import {Countries} from '../Data/Countries';
 import ForgotPWIMG from '../assets/ForgotPW.png';
 import LoginIMG from '../assets/Login.png';
 import CustomButton from '../components/CustomButton';
 import CustomHeader from '../components/CustomHeader';
-import {
-  CheckPhoneCanRegister,
-  Login,
-  ReLogin,
-  SendOTP,
-  UpdateProfile,
-} from '../modules/signup';
 import CustomTextInput from '../components/CustomTextInput';
-import {useDispatch, useSelector} from 'react-redux';
+import {PostFunc} from '../modules/signup';
 import {savePhoneNumber} from '../redux/auththenSlice';
 import {updateProfile} from '../redux/profileSlice';
+import {Login, LoginModel, Phone, PhoneModel, ReLogin} from '../modules/model';
 
 const LoginScreen = ({navigation}) => {
-  const defaultCountryCode = '+84';
+  const defaultCountryCode = '84';
   const defaultMaskCountry = '39 666 1101';
   const loginTitle = 'Login';
   const desc = 'Please input you phone number';
@@ -56,7 +51,12 @@ const LoginScreen = ({navigation}) => {
     setPhoneNumber(number);
   };
   const onPressLogin = async () => {
-    const res = await Login('84', phoneNumber, password);
+    const data: LoginModel = {
+      calling_code: codeCountry,
+      phone: phoneNumber,
+      password: password,
+    };
+    const res = await PostFunc('Login', data);
     console.log(res);
     if (!res.success) {
       Alert.alert(res.message);
@@ -73,14 +73,15 @@ const LoginScreen = ({navigation}) => {
     checkUserAlreadyLogin();
   }, []);
   const checkUserAlreadyLogin = async () => {
-    const res = await ReLogin(phoneData.id.toString(), phoneData.session_id);
-    console.log(res);
+    const data: ReLogin = {
+      user: phoneData.id.toString(),
+      session_id: phoneData.session_id,
+    };
+    const res = await PostFunc('ReLogin', data);
     if (res.success) {
       dispatch(updateProfile(res.data));
       setVisiblePopUp(true);
-      // Alert.alert('Welcome Back ' + phoneData?.data.username);
     }
-    // console.log('Login OK', res);
   };
   const OnSelectLogin = () => {
     setVisiblePopUp(false);
@@ -90,16 +91,23 @@ const LoginScreen = ({navigation}) => {
     setVisiblePopUp(false);
   };
   const onPressCreateAccount = async () => {
-    const res = await CheckPhoneCanRegister(phoneNumber, '84');
-    if (!res.success) {
-      Alert.alert(res.message);
+    const data: PhoneModel = {
+      calling_code: codeCountry,
+      phone: phoneNumber,
+    };
+    const checkRegisterResponse = await PostFunc('CheckPhoneCanRegister', data);
+    if (!checkRegisterResponse.success) {
+      Alert.alert(checkRegisterResponse.message);
       return;
     }
-    const newUserData = res.data;
-    console.log(newUserData);
+    const newUserData = checkRegisterResponse.data;
+    // console.log(newUserData);
     dispatch(savePhoneNumber(newUserData));
-
-    const OTPSend = await SendOTP(newUserData.phone, newUserData.calling_code);
+    const oTPData: PhoneModel = {
+      calling_code: newUserData.calling_code,
+      phone: newUserData.phone,
+    };
+    const OTPSend = await PostFunc('SendOTP', oTPData);
     if (OTPSend.success) {
       Alert.alert(OTPSend.message);
       navigation.navigate('InputOTP');
@@ -400,5 +408,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
   },
-
 });
