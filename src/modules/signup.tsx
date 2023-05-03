@@ -1,5 +1,4 @@
 import axios from 'axios';
-import {Phone, Profile} from './model';
 const BaseURL = 'https://helpmiee.com/api';
 const CheckPhoneApi = '/vi/phone-can-register.json';
 const SendOTPApi = '/vi/otp/send.json';

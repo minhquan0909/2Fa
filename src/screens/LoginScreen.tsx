@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {
   Alert,
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   SafeAreaView,
@@ -19,10 +20,11 @@ import LoginIMG from '../assets/Login.png';
 import CustomButton from '../components/CustomButton';
 import CustomHeader from '../components/CustomHeader';
 import CustomTextInput from '../components/CustomTextInput';
+import {LoginModel, PhoneModel, ReLogin} from '../modules/model';
 import {PostFunc} from '../modules/signup';
 import {savePhoneNumber} from '../redux/auththenSlice';
 import {updateProfile} from '../redux/profileSlice';
-import {Login, LoginModel, Phone, PhoneModel, ReLogin} from '../modules/model';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const LoginScreen = ({navigation}) => {
   const defaultCountryCode = '84';
@@ -41,6 +43,8 @@ const LoginScreen = ({navigation}) => {
   const [focusPassword, setFocusPassword] = useState(false);
   const [visiblePopUp, setVisiblePopUp] = useState(false);
   const [loginDirectly, setLoginDirectly] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const phoneData = useSelector(state => state.authen);
   const dispatch = useDispatch();
   // console.log('PhoneDAta', phoneData);
@@ -208,62 +212,65 @@ const LoginScreen = ({navigation}) => {
     );
   };
   return (
-    <View style={styles.container}>
-      {renderLoginPopUp()}
-      <KeyboardAvoidingView
-        keyboardVerticalOffset={50}
-        behavior="padding"
-        style={styles.keyboardAvoidingViewContainer}>
-        <CustomHeader
-          title={signInOrSignUp ? loginTitle : signUpTitle}
-          description={desc}
-          imgSource={signInOrSignUp ? LoginIMG : ForgotPWIMG}
-        />
-        <View
-          style={[
-            styles.inputContainer,
-            {borderBottomColor: focusInput ? '#1A4F8B' : 'white'},
-          ]}>
-          <TouchableOpacity onPress={onShowModal}>
-            <View style={styles.openDialogView}>
-              <Text>{codeCountry + ' |'}</Text>
-            </View>
-          </TouchableOpacity>
-          {renderModal()}
-          <TextInput
-            placeholder={placeholder}
-            keyboardType="numeric"
-            value={phoneNumber}
-            onChangeText={onChangePhone}
-            secureTextEntry={false}
-            style={styles.phoneInput}
-            onFocus={onChangeFocus}
-            onBlur={onChageBlur}
-            autoFocus={focusInput}
+    <KeyboardAwareScrollView
+      extraScrollHeight={30}
+      scrollEnabled={false}
+      contentContainerStyle={styles.container}>
+      <View style={styles.inner}>
+        <View style={styles.topView}>
+          {renderLoginPopUp()}
+          <CustomHeader
+            title={signInOrSignUp ? loginTitle : signUpTitle}
+            description={desc}
+            imgSource={signInOrSignUp ? LoginIMG : ForgotPWIMG}
           />
-        </View>
-        {signInOrSignUp ? (
-          <CustomTextInput
-            placeholder={'Password'}
-            keyboardType={'default'}
-            value={password}
-            onChangeText={input => setPassword(input)}
-            onChangeFocus={() => setFocusPassword(true)}
-            onChageBlur={() => setFocusPassword(false)}
-            autoFocus={focusPassword}
-            focusInput={focusPassword}
-          />
-        ) : (
-          ''
-        )}
-        <View style={styles.forgotPWContainer}>
-          <TouchableOpacity hitSlop={20} onPress={changeLoginOrForgotPW}>
-            <Text style={styles.textForgotPw}>
-              {signInOrSignUp === true
-                ? 'Create new accounts'
-                : 'Already have account'}
-            </Text>
-          </TouchableOpacity>
+          <View
+            style={[
+              styles.inputContainer,
+              {borderBottomColor: focusInput ? '#1A4F8B' : 'white'},
+            ]}>
+            <TouchableOpacity onPress={onShowModal}>
+              <View style={styles.openDialogView}>
+                <Text>{codeCountry + ' |'}</Text>
+              </View>
+            </TouchableOpacity>
+            {renderModal()}
+            <TextInput
+              placeholder={placeholder}
+              keyboardType="numeric"
+              value={phoneNumber}
+              onChangeText={onChangePhone}
+              secureTextEntry={false}
+              style={styles.phoneInput}
+              onFocus={onChangeFocus}
+              onBlur={onChageBlur}
+              autoFocus={focusInput}
+            />
+          </View>
+          {signInOrSignUp ? (
+            <CustomTextInput
+              placeholder={'Password'}
+              keyboardType={'default'}
+              value={password}
+              onChangeText={input => setPassword(input)}
+              onChangeFocus={() => setFocusPassword(true)}
+              onChageBlur={() => setFocusPassword(false)}
+              autoFocus={focusPassword}
+              focusInput={focusPassword}
+              isPassword={true}
+            />
+          ) : (
+            ''
+          )}
+          <View style={styles.forgotPWContainer}>
+            <TouchableOpacity hitSlop={20} onPress={changeLoginOrForgotPW}>
+              <Text style={styles.textForgotPw}>
+                {signInOrSignUp === true
+                  ? 'Create new accounts'
+                  : 'Already have account'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={styles.bottomView}>
           <CustomButton
@@ -272,21 +279,20 @@ const LoginScreen = ({navigation}) => {
             onPress={signInOrSignUp ? onPressLogin : onPressCreateAccount}
           />
         </View>
-      </KeyboardAvoidingView>
-    </View>
+      </View>
+    </KeyboardAwareScrollView>
   );
 };
 export default React.memo(LoginScreen);
 const styles = StyleSheet.create({
+  inner: {
+    flex: 1,
+    padding: 10,
+    justifyContent: 'space-around',
+  },
   container: {
     flex: 1,
   },
-  keyboardAvoidingViewContainer: {
-    flex: 1,
-    padding: 10,
-    alignItems: 'center',
-  },
-
   inputContainer: {
     flexDirection: 'row',
     paddingHorizontal: 12,
@@ -306,12 +312,9 @@ const styles = StyleSheet.create({
     height: 50,
   },
   bottomView: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    marginBottom: 30,
+    marginBottom: 20,
     alignItems: 'center',
   },
-
   forgotPWContainer: {
     flexDirection: 'row',
     alignSelf: 'flex-end',
@@ -407,5 +410,8 @@ const styles = StyleSheet.create({
   userName: {
     fontWeight: 'bold',
     fontSize: 18,
+  },
+  topView: {
+    width: '100%',
   },
 });

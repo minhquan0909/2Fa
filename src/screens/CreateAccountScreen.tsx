@@ -17,6 +17,7 @@ import {PostFunc, UpdatePassword} from '../modules/signup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {updateProfile} from '../redux/profileSlice';
 import {UpdatePasswordModel} from '../modules/model';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 const CreateAccountScreen = ({navigation}) => {
   const [focusPassword, setFocusPassword] = useState(true);
   const [focusConfirmPassword, setFocusConfirmPassword] = useState(false);
@@ -68,10 +69,10 @@ const CreateAccountScreen = ({navigation}) => {
     setFocusConfirmPassword(false);
   };
   return (
-    <KeyboardAvoidingView
-      keyboardVerticalOffset={50}
-      behavior="padding"
-      style={styles.keyboardAvoidingViewContainer}>
+    <KeyboardAwareScrollView
+      extraScrollHeight={30}
+      scrollEnabled={false}
+      contentContainerStyle={styles.keyboardAvoidingViewContainer}>
       <TouchableWithoutFeedback
         style={styles.container}
         onPress={Keyboard.dismiss}>
@@ -91,6 +92,7 @@ const CreateAccountScreen = ({navigation}) => {
               autoFocus={focusPassword}
               onChangeText={onChangePassword}
               keyboardType={'default'}
+              isPassword={true}
             />
             <CustomTextInput
               placeholder={'Confirm password'}
@@ -101,6 +103,7 @@ const CreateAccountScreen = ({navigation}) => {
               autoFocus={focusConfirmPassword}
               onChangeText={onChangeConfirmPW}
               keyboardType={'default'}
+              isPassword={true}
             />
           </View>
           <CustomButton
@@ -110,7 +113,7 @@ const CreateAccountScreen = ({navigation}) => {
           />
         </View>
       </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+    </KeyboardAwareScrollView>
   );
 };
 export default React.memo(CreateAccountScreen);
