@@ -20,7 +20,7 @@ const SETTING_LIST_ITEM = [
 
 const SettingScreen = ({navigation}) => {
   const onPressItem = path => {
-    navigation.navigate(path);
+    navigation.navigate(path, {flag: 1});
   };
   const renderItem = ({item}) => {
     return (

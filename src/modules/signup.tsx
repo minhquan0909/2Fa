@@ -9,6 +9,7 @@ const UpdateProfileApi = '/vi/profile/update.json';
 const CheckExistAPI = '/vi/phone-exists.json';
 const ReLoginAPI = '/vi/relogin.json';
 const LoginAPI = '/vi/login.json';
+const GetCountriesAPI = '/vi/country.json';
 
 export const PostFunc = async (TYPE: string, requestData: any) => {
   let POST_API = '';
@@ -49,6 +50,9 @@ export const GetFunc = async (TYPE: string, requestData: any) => {
   switch (TYPE) {
     case 'GetOTP':
       GET_API = GetOTPApi;
+      break;
+    case 'GetCountryCode':
+      GET_API = GetCountriesAPI;
       break;
     default:
       break;

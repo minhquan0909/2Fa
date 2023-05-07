@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   StyleSheet,
@@ -21,7 +21,10 @@ function CustomTextInput(props) {
     containerStyle,
     isPassword,
   } = props;
-  const [showPassword, setShowPassword] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  useEffect(() => {
+    isPassword ? setShowPassword(true) : setShowPassword(false);
+  }, []);
   return (
     <View
       style={[

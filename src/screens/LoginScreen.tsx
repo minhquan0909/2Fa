@@ -2,8 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {
   Alert,
   FlatList,
-  Keyboard,
-  KeyboardAvoidingView,
   Modal,
   SafeAreaView,
   StyleSheet,
@@ -13,18 +11,17 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {useDispatch, useSelector} from 'react-redux';
-import {Countries} from '../Data/Countries';
 import ForgotPWIMG from '../assets/ForgotPW.png';
 import LoginIMG from '../assets/Login.png';
 import CustomButton from '../components/CustomButton';
 import CustomHeader from '../components/CustomHeader';
 import CustomTextInput from '../components/CustomTextInput';
 import {LoginModel, PhoneModel, ReLogin} from '../modules/model';
-import {PostFunc} from '../modules/signup';
+import {GetFunc, PostFunc} from '../modules/signup';
 import {savePhoneNumber} from '../redux/auththenSlice';
 import {updateProfile} from '../redux/profileSlice';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const LoginScreen = ({navigation}) => {
   const defaultCountryCode = '84';
@@ -35,18 +32,24 @@ const LoginScreen = ({navigation}) => {
   const [phoneNumber, setPhoneNumber] = useState();
   const [focusInput, setFocusInput] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [countriesData, setCountriesData] = useState(Countries);
+  const [countriesData, setCountriesData] = useState([]);
   const [codeCountry, setCodeCountry] = useState(defaultCountryCode);
   const [placeholder, setPlaceHolder] = useState(defaultMaskCountry);
   const [signInOrSignUp, setSignInOrSignUp] = useState(true); //Login:true Register:false
   const [password, setPassword] = useState('');
   const [focusPassword, setFocusPassword] = useState(false);
   const [visiblePopUp, setVisiblePopUp] = useState(false);
-  const [loginDirectly, setLoginDirectly] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   const phoneData = useSelector(state => state.authen);
   const dispatch = useDispatch();
+  useEffect(() => {
+    const getCountryCodes = async () => {
+      const res = await GetFunc('GetCountryCode', '');
+      console.log(res.data);
+      setCountriesData(res.data);
+    };
+    getCountryCodes();
+  }, []);
   // console.log('PhoneDAta', phoneData);
   const onShowModal = () => {
     setModalVisible(!modalVisible);
@@ -61,7 +64,7 @@ const LoginScreen = ({navigation}) => {
       password: password,
     };
     const res = await PostFunc('Login', data);
-    console.log(res);
+    // console.log(res);
     if (!res.success) {
       Alert.alert(res.message);
       return;
@@ -124,8 +127,8 @@ const LoginScreen = ({navigation}) => {
     setFocusInput(false);
   };
   const onCountryChange = item => {
-    setCodeCountry(item?.dialCode);
-    setPlaceHolder(item?.mask);
+    setCodeCountry(item?.calling_code);
+    // setPlaceHolder(item?.mask);
     onShowModal();
   };
   const changeLoginOrForgotPW = () => {
@@ -135,11 +138,12 @@ const LoginScreen = ({navigation}) => {
   const filterCountries = value => {
     if (value) {
       const countryData = countriesData.filter(
-        obj => obj.en.indexOf(value) > -1 || obj.dialCode.indexOf(value) > -1,
+        obj =>
+          obj.name.indexOf(value) > -1 || obj.calling_code.indexOf(value) > -1,
       );
       setCountriesData(countryData);
     } else {
-      setCountriesData(Countries);
+      setCountriesData(countriesData);
     }
   };
 
@@ -192,9 +196,9 @@ const LoginScreen = ({navigation}) => {
                 <TouchableWithoutFeedback onPress={() => onCountryChange(item)}>
                   <View style={styles.countryModalStyle}>
                     <View style={styles.modalItemContainer}>
-                      <Text style={styles.modalItemName}>{item.en}</Text>
+                      <Text style={styles.modalItemName}>{item.name}</Text>
                       <Text style={styles.modalItemDialCode}>
-                        {item.dialCode}
+                        {item.calling_code}
                       </Text>
                     </View>
                   </View>
@@ -231,7 +235,7 @@ const LoginScreen = ({navigation}) => {
             ]}>
             <TouchableOpacity onPress={onShowModal}>
               <View style={styles.openDialogView}>
-                <Text>{codeCountry + ' |'}</Text>
+                <Text> +{codeCountry + ' |'}</Text>
               </View>
             </TouchableOpacity>
             {renderModal()}

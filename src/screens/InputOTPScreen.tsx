@@ -68,20 +68,27 @@ const InputOTPScreen = ({navigation}) => {
       //Correct OTP
       // console.log('CorrectOTP', verifyOTPRes.data);
       dispatch(updateProfile(verifyOTPRes.data));
-      navigation.navigate('CreateAccount');
+      navigation.navigate('CreateAccount', {flag: 0});
     }
   };
   const onChangeNumber = () => {
     setInternalValue('');
   };
-  const onResendOTP = () => {
+  const onResendOTP = async () => {
     if (enableResend) {
+      const oTPData: PhoneModel = {
+        calling_code: userPhone.calling_code,
+        phone: userPhone.phone,
+      };
+      const OTPSend = await PostFunc('SendOTP', oTPData);
+      if (!OTPSend.success) {
+        Alert.alert(OTPSend.message);
+        return;
+      }
+      Alert.alert(OTPSend.message);
       setCountDown(defaultCountDown);
       setEnableResend(false);
-      clearInterval(clockCall);
-      clockCall = setInterval(() => {
-        decrementClock();
-      }, 1000);
+      GetFunc('GetOTP', oTPData);
     }
   };
   return (

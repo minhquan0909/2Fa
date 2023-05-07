@@ -18,13 +18,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {updateProfile} from '../redux/profileSlice';
 import {UpdatePasswordModel} from '../modules/model';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-const CreateAccountScreen = ({navigation}) => {
+const CreateAccountScreen = ({navigation, route}) => {
   const [focusPassword, setFocusPassword] = useState(true);
   const [focusConfirmPassword, setFocusConfirmPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const userProfile = useSelector(state => state.profile);
-
   const dispatch = useDispatch();
   const onChangePassword = password => {
     setPassword(password);
@@ -33,6 +32,7 @@ const CreateAccountScreen = ({navigation}) => {
     setConfirmPassword(confirmPW);
   };
   const onPressCreateAccount = async () => {
+    // console.log(route.params);
     if (password === confirmPassword) {
       //Password Match
       const updatePasswordData: UpdatePasswordModel = {
@@ -51,7 +51,11 @@ const CreateAccountScreen = ({navigation}) => {
       }
       dispatch(updateProfile(updatePasswordres.data));
       Alert.alert(updatePasswordres.message);
-      navigation.navigate('Profile');
+      if (route.params.flag === 1) {
+        navigation.navigate('Home');
+      } else {
+        navigation.navigate('Profile');
+      }
     } else {
       Alert.alert('Password do not match');
     }
@@ -108,7 +112,7 @@ const CreateAccountScreen = ({navigation}) => {
           </View>
           <CustomButton
             activeBy={password && confirmPassword}
-            title={'Create Account'}
+            title={'Update'}
             onPress={onPressCreateAccount}
           />
         </View>

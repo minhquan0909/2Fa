@@ -20,65 +20,84 @@ import Tele_IC from '../assets/telegram_ic.png';
 import CustomHeader from '../components/CustomHeader';
 import CustomTextInput from '../components/CustomTextInput';
 import {addKey, removeKey, updateKey} from '../redux/secretSlice';
+import {CurrentRenderContext} from '@react-navigation/native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const HomeScreen = ({navigation}) => {
-  const [oTPgen, setOTPgen] = useState('------');
-  const [counter, setCounter] = useState(30);
+  const [otp, setOTP] = useState('');
+  const [counter, setCounter] = useState(5);
   const [secretValue, setSecretValue] = useState('');
   const [secretKeyName, setSecretKeyName] = useState('');
   const [modalFeaturesVisible, setModalFeaturesVisible] = useState(false);
   const [secretKeyList, setSecretKeyList] = useState([]);
-  const [selectedValue, setSelecedValue] = useState('');
   const dispatch = useDispatch();
   const secretKeyStore = useSelector(state => state.secret.keys);
   const [isUpdate, setIsUpdate] = useState(false); //create=true
   const [selectedItemID, setSelectedItemID] = useState();
-
+  const [auth, setAuth] = useState(null);
+  const [authName, setAuthName] = useState('');
+  const [keyUri, setKeyUri] = useState(null);
   useEffect(() => {
     setSecretKeyList(secretKeyStore);
   }, [secretKeyStore]);
   // console.log(secretKeyList);
   const onPressCopyCode = () => {
-    console.log(oTPgen);
+    console.log(otp);
   };
   const OnpressCreateNewKey = () => {
     setSecretKeyName('');
     setSecretValue('');
     setModalFeaturesVisible(!modalFeaturesVisible);
+    console.log('OnpressCreateNewKey');
   };
   const OnPressDelete = () => {
     dispatch(removeKey({id: selectedItemID}));
     setIsUpdate(false);
     setModalFeaturesVisible(false);
   };
+  // console.log(auth);
+  useEffect(() => {
+    const countDownFunc = setInterval(() => {
+      const now = Math.floor(Date.now() / 1000);
+      const timeRemain = 5 - (now % 5); //Create timer. It should be 30, I know, but i want to see the change timer sooner
+      setCounter(timeRemain);
+    }, 1000);
+    return () => clearInterval(countDownFunc);
+  }, []);
+
+  useEffect(() => {
+    // Create key checker, if new select new key, we create new OTP object with following info
+    // then setState for newAuth
+    if (keyUri) {
+      const newAuth = new OTPAuth.TOTP({
+        issuer: 'User',
+        label: authName,
+        algorithm: 'SHA1',
+        digits: 6,
+        period: 5,
+        secret: keyUri,
+      });
+      setAuth(newAuth);
+    } else {
+      setAuth(null);
+    }
+  }, [keyUri]);
+  useEffect(() => {
+    // AuthKey and counter checker, when counter change or Auth change, create new OTP then setState for it
+    if (auth) {
+      const newOTP = auth.generate();
+      setOTP(newOTP);
+    } else {
+      setOTP(null);
+    }
+  }, [auth, counter]);
+
   const renderItem = ({index, item}) => {
     const onPressAuthenItem = () => {
       setSelectedItemID(item.id);
-      console.log('currentkey', selectedValue);
-      setSelecedValue(item.value);
-      console.log('selectedKey', item.value);
-      const curentSelectedKey = item.value;
-      const newTotp = new OTPAuth.TOTP({
-        issuer: 'User',
-        label: item.name,
-        algorithm: 'SHA1',
-        digits: 6,
-        period: 30,
-        secret: item.value, // or 'OTPAuth.Secret.fromBase32("NB2W45DFOIZA")'
-      });
-      if (curentSelectedKey !== selectedValue) {
-        newTotp.secret = selectedValue;
-        const countDown = setInterval(() => {
-          // console.log(newTotp);
-          const now = Math.floor(Date.now() / 1000);
-          const timeRemaining = 30 - (now % 30); //Create timer
-          const otpCode = newTotp.generate(); //OTP genegrate
-          setOTPgen(otpCode); //BUG if select another key, system didn't delete the old key
-          setCounter(timeRemaining);
-          // console.log(otpCode, timeRemaining, newTotp);
-        }, 1000);
-        return () => clearInterval(countDown);
-      }
+      setKeyUri(item.value);
+      setAuthName(item.name);
+      console.log(auth, otp, keyUri);
     };
     const onLongPressAuthenItem = () => {
       setSelectedItemID(item.id);
@@ -139,52 +158,59 @@ const HomeScreen = ({navigation}) => {
       <Modal
         animationType="slide"
         transparent={false}
-        visible={modalFeaturesVisible}
-        onRequestClose={() => {
-          setModalFeaturesVisible(modalFeaturesVisible);
-        }}>
-        <TouchableWithoutFeedback>
-          <View style={styles.modalContainer}>
-            {/* <Camera
-              style={StyleSheet.absoluteFill}
-              device={device}
-              isActive={true}
-            /> */}
-            <View style={styles.popupBackground}>
-              <Text style={styles.popUpTitle}>Input your OTP</Text>
-              <CustomTextInput
-                placeholder={'Secret key name'}
-                value={secretKeyName}
-                onChangeText={value => setSecretKeyName(value)}
-                keyboardType={'default'}
-                containerStyle={styles.popUPTextInputContainer}
-              />
-              <CustomTextInput
-                placeholder={'Secret value'}
-                value={secretValue}
-                onChangeText={value => setSecretValue(value)}
-                keyboardType={'default'}
-                containerStyle={styles.popUPTextInputContainer}
-              />
-              <View style={styles.popUpButtonArea}>
-                <TouchableOpacity
-                  style={styles.buttonSave}
-                  onPress={OnPressSaveKey}>
-                  <Text>Save</Text>
-                </TouchableOpacity>
-                {isUpdate ? (
+        visible={modalFeaturesVisible}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'blue ',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <KeyboardAwareScrollView
+            contentContainerStyle={{backgroundColor: 'red'}}
+            scrollEnabled={false}>
+            <View style={styles.modalContainer}>
+              {/* <Camera
+                style={StyleSheet.absoluteFill}
+                device={device}
+                isActive={true}
+              /> */}
+              <View style={styles.popupBackground}>
+                <Text style={styles.popUpTitle}>Input your OTP</Text>
+                <CustomTextInput
+                  placeholder={'Secret key name'}
+                  value={secretKeyName}
+                  onChangeText={value => setSecretKeyName(value)}
+                  keyboardType={'default'}
+                  containerStyle={styles.popUPTextInputContainer}
+                />
+                <CustomTextInput
+                  placeholder={'Secret value'}
+                  value={secretValue}
+                  onChangeText={value => setSecretValue(value)}
+                  keyboardType={'default'}
+                  containerStyle={styles.popUPTextInputContainer}
+                />
+                <View style={styles.popUpButtonArea}>
                   <TouchableOpacity
-                    style={[styles.buttonSave, {backgroundColor: 'pink'}]}
-                    onPress={OnPressDelete}>
-                    <Text>Delete</Text>
+                    style={styles.buttonSave}
+                    onPress={OnPressSaveKey}>
+                    <Text>Save</Text>
                   </TouchableOpacity>
-                ) : (
-                  ''
-                )}
+                  {isUpdate ? (
+                    <TouchableOpacity
+                      style={[styles.buttonSave, {backgroundColor: 'pink'}]}
+                      onPress={OnPressDelete}>
+                      <Text>Delete</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    ''
+                  )}
+                </View>
               </View>
             </View>
-          </View>
-        </TouchableWithoutFeedback>
+          </KeyboardAwareScrollView>
+        </View>
       </Modal>
     );
   };
@@ -209,7 +235,7 @@ const HomeScreen = ({navigation}) => {
       </View>
       <View style={styles.codeArea}>
         <View style={styles.codeRow}>
-          <Text style={styles.codeStyle}>{oTPgen}</Text>
+          <Text style={styles.codeStyle}>{otp ? otp : '------'}</Text>
           <TouchableOpacity
             style={styles.imgContainer}
             onPress={onPressCopyCode}>
@@ -238,7 +264,7 @@ const HomeScreen = ({navigation}) => {
 };
 export default React.memo(HomeScreen);
 const styles = StyleSheet.create({
-  container: {flex: 1, alignItems: 'center'},
+  container: {alignItems: 'center'},
   topBarContainer: {
     width: '100%',
     flexDirection: 'row',

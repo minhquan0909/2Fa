@@ -13,9 +13,10 @@ import ProfileIMG from '../assets/UpdateProfile.png';
 import CustomButton from '../components/CustomButton';
 import CustomHeader from '../components/CustomHeader';
 import CustomTextInput from '../components/CustomTextInput';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {PostFunc, UpdateProfile} from '../modules/signup';
 import {ProfileModel} from '../modules/model';
+import {updateProfile} from '../redux/profileSlice';
 
 const ProfileScreen = ({navigation}) => {
   const [gender, setGender] = useState(null);
@@ -24,21 +25,20 @@ const ProfileScreen = ({navigation}) => {
   const [fullName, setFullName] = useState();
   const [email, setEmail] = useState();
   const [focusFullName, setFocusFullName] = useState(true);
-  const [focusBirthDay, setFocusBirthDay] = useState(false);
   const [focusEmail, setFocusEmail] = useState(false);
-  const [focusGender, setForcusGender] = useState(false);
   const [userName, setUserName] = useState('');
   const [focusUserName, setFocusUserName] = useState();
-
+  const dispatch = useDispatch();
   const genderDropdata = ['male', 'female', 'others'];
   const UserProfile = useSelector(state => state.profile);
-  console.log(UserProfile);
+  // console.log(UserProfile);
   useEffect(() => {
+    setUserName(UserProfile.username);
     setGender(UserProfile.gender);
-    // setBirthDay(UserProfile.birthday);
+    setBirthDay(new Date(UserProfile.birthday));
     setFullName(UserProfile.full_name);
     setEmail(UserProfile.email);
-  }, []);
+  }, [UserProfile]);
   const onChangeName = value => {
     setFullName(value);
   };
@@ -66,6 +66,7 @@ const ProfileScreen = ({navigation}) => {
         return;
       }
       Alert.alert(updateProfileRes.message);
+      dispatch(updateProfile(profileData));
       navigation.navigate('Home');
     }
   };
@@ -86,6 +87,7 @@ const ProfileScreen = ({navigation}) => {
             />
             <View style={styles.inputArea}>
               <CustomTextInput
+                isPassword={false}
                 placeholder={'User name'}
                 focusInput={focusUserName}
                 value={userName}
@@ -96,6 +98,7 @@ const ProfileScreen = ({navigation}) => {
                 keyboardType={'default'}
               />
               <CustomTextInput
+                isPassword={false}
                 placeholder={'Full name'}
                 focusInput={focusFullName}
                 value={fullName}
@@ -106,6 +109,7 @@ const ProfileScreen = ({navigation}) => {
                 keyboardType={'default'}
               />
               <CustomTextInput
+                isPassword={false}
                 placeholder={'Email address'}
                 focusInput={focusEmail}
                 value={email}
@@ -119,6 +123,7 @@ const ProfileScreen = ({navigation}) => {
                 <View style={styles.dropDownContainer}>
                   <Text>Gender:</Text>
                   <SelectDropdown
+                    defaultValue={gender}
                     buttonTextStyle={styles.dropDownTextStyle}
                     dropdownStyle={styles.dropDownStyles}
                     buttonStyle={styles.dropDownButton}
